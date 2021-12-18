@@ -56,14 +56,13 @@ int main() {
   vector<board> boards;
 
   {
-    // current board
     board current_board;
     int index = -1;
     while( getline(file, current_line)){
       // new board, push empty board and read stuffs
       if(current_line.empty())
       {
-        boards.push_back(current_board); 
+        boards.emplace_back(); // create an object of type board, with no arguments 
         index++;
         continue;   
       }
@@ -88,12 +87,13 @@ int main() {
   // flip boards and resize
   // ==================================================================
   {
-    vector<vector<int>> flipped_board = boards[0].lines;
+    // vector<vector<int>> flipped_board(boards[0].size(), vector<int>(boards[0][0].size()));
+    vector<vector<int>> flipped_board = boards[0].lines; // using to initalize 
     for(int board=0; board<boards.size();board++)
     {
       for(int x=0; x<boards[board].lines.size(); x++)
       {
-        for(int y=0; y<boards[board].lines.size(); y++)
+        for(int y=0; y<boards[board].lines.size(); y++) // figure out actual logic mam
         {
           flipped_board[x][y] = boards[board].lines[y][x];
         }
@@ -121,19 +121,25 @@ int main() {
   // read first bingo number 
   for(auto bingo: bingo_numbers)
   {
-    for(auto &board: boards)
+    for(int board=0; board<boards.size();board++)
     {
-      for(int line=0; line < board.lines.size(); line++)
+      for(int line=0; line < boards[board].lines.size(); line++)
       {
-        auto negative = count(board.lines[line].begin(), board.lines[line].end(), bingo) * bingo;
-        board.sum_unmarked[line] -= count(board.lines[line].begin(), board.lines[line].end(), bingo) * bingo;
-        if(board.sum_unmarked[line] <= 0)
+        auto negative = count(boards[board].lines[line].begin(), boards[board].lines[line].end(), bingo) * bingo;
+        boards[board].sum_unmarked[line] -= count(boards[board].lines[line].begin(), boards[board].lines[line].end(), bingo) * bingo;
+        if(boards[board].sum_unmarked[line] <= 0)
         {
-          auto answer = bingo * accumulate(board.sum_unmarked.begin(), board.sum_unmarked.begin() + 5 , 0);
-          cout << "Someone won" << endl;
+          auto answer = bingo * accumulate(boards[board].sum_unmarked.begin(), boards[board].sum_unmarked.begin() + 5 , 0);
+          cout << "Board won, answer: " << answer << endl;
+          if(boards.size() == 1)
+          {
+            cout << "Last one" << endl;
+          }
+          boards.erase(boards.begin() + board);
+          board--;
+          break;
         }
       }
-      // check if board won?
     }
   }
 
